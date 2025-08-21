@@ -1,26 +1,36 @@
-# frozen_string_literal: true
-
+# class String Claculator to perform Sting related actions like add numbers etc
 class StringCalculator
   def add(numbers)
+
+    # returns if there is no input value
     return 0 if numbers.nil? || numbers.empty?
 
-    # Custom delimiter header: //<delim>\n<payload>
-    delimiter_regex, payload = if numbers.start_with?("//")
-      header, payload = numbers.split("\n", 2)
-      delimiter = Regexp.escape(header[2..]) # part after //
-      [Regexp.union(/#{delimiter}/, /\n/), payload.to_s]
-    else
-      [Regexp.union(/,/, /\n/), numbers]
-    end
+    # set delimiter_regex and number_stringand 
+    delimiter_regex, number_string = build_delimited_string(numbers)
+  
 
-    # If it's a single number (no delimiter present)
-    return payload.to_i if payload !~ delimiter_regex
+    # Return if single number
+    return number_string.to_i if number_string !~ delimiter_regex
 
-    parts = payload.split(delimiter_regex)
-    nums = parts.reject(&:empty?).map(&:to_i)
+    # Get an array of numbers to be added
+    nums = number_string.split(delimiter_regex).map(&:to_i)
+
+    # raise an error in nagative values are present
     negatives = nums.select(&:negative?)
     raise "negative numbers not allowed #{negatives.join(',')}" if negatives.any?
 
     nums.sum
+  end
+
+  private
+  
+  def build_delimited_string(numbers)
+    if numbers.start_with?("//")
+      delimiter_string, rest = numbers.split("\n", 2)
+      delimiter = Regexp.escape(delimiter_string[2..]) # part after //
+      [Regexp.union(/#{delimiter}/, /\n/), rest.to_s]
+    else
+      [Regexp.union(/,/, /\n/), numbers]
+    end
   end
 end
